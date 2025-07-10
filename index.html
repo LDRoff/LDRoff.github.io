@@ -437,15 +437,20 @@
         const songsContainer = document.getElementById('songsContainer');
         
         // Ваш URL Google Apps Script
-        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbxRgXEtWGeT2jydQNjYdBv4z_XPeUjquLyKnPCnd6WlIvDezVqmG4jsE5LqLG7RoCbP/exec";
+        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbzpSdMpviVaQ5NnPIKJhEIQEAbtDVp3KNG9gAie9EE4qstZOr18JSnILDzD3duZJgc6/exec";
         
-        // Загрузка песен при открытии страницы
+        // Загрузка существующих песен при открытии страницы
         loadExistingSongs();
         
         // Функция загрузки песен из таблицы
         async function loadExistingSongs() {
             try {
                 const response = await fetch(googleScriptUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.status === 'success') {
@@ -460,7 +465,7 @@
             }
         }
         
-        // Функция добавления песни в список на странице
+        // Функция добавления песни в UI
         function addSongToUI(songName) {
             const songItem = document.createElement('div');
             songItem.className = 'song-item';
@@ -484,26 +489,32 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
             
             try {
-                // Важное изменение: используем режим 'no-cors' и FormData
-                const formData = new FormData();
-                formData.append('song', songName);
-                
                 const response = await fetch(googleScriptUrl, {
                     method: 'POST',
-                    mode: 'no-cors', // Решаем проблему CORS
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({song: songName})
                 });
                 
-                // После отправки обновляем список песен
-                setTimeout(() => {
-                    loadExistingSongs();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
                     showMessage(`Спасибо! Песня "${songName}" добавлена!`, 'success');
                     songInput.value = '';
-                }, 2000);
-                
+                    
+                    // Обновляем список песен
+                    loadExistingSongs();
+                } else {
+                    throw new Error(data.message || 'Ошибка сервера');
+                }
             } catch (error) {
                 console.error('Ошибка:', error);
-                showMessage('Не удалось добавить песню. Попробуйте еще раз.', 'error');
+                showMessage('Ошибка при отправке: ' + error.message, 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
