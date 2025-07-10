@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Свадебный Плейлист | Анна & Михаил</title>
+    <title>Свадебный Плейлист | Эльдар & Евгения</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
@@ -398,7 +398,7 @@
             <i class="decoration heart1 fas fa-heart"></i>
             <i class="decoration heart2 fas fa-heart"></i>
             <i class="decoration heart3 fas fa-heart"></i>
-            <h1>Анна & Михаил</h1>
+            <h1>Эльдар & Евгения</h1>
             <p>Дорогие гости! Предложите песни, которые будут звучать на нашей свадьбе во время танцевальных пауз</p>
         </div>
         
@@ -425,110 +425,124 @@
         </div>
         
         <div class="footer">
-            С любовью, Анна и Михаил • 10 июля 2025 • Все песни будут играть на нашей свадьбе!
+            С любовью, Эльдар и Евгения • 9 Августа 2025 • Все песни будут играть на нашей свадьбе!
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const songInput = document.getElementById('songInput');
-            const submitBtn = document.getElementById('submitBtn');
-            const message = document.getElementById('message');
-            const songsContainer = document.getElementById('songsContainer');
-            
-            // Ваш URL Google Apps Script - ЗАМЕНИТЕ ЭТОТ АДРЕС НА СВОЙ!
-            const googleScriptUrl = "https://script.google.com/macros/s/AKfycbwPQJCrV-tjA4gHeBrzgdIyAh7iucJPJ7bOjZe-77FCAI8i0WODLr7WYEahGxgFKlU/exec";
-            
-            // Загрузка существующих песен при загрузке страницы
-            loadExistingSongs();
-            
-            // Функция для загрузки существующих песен
-            function loadExistingSongs() {
-                // В реальном приложении здесь будет запрос к серверу
-                // Для демо используем статические данные
-                const demoData = [
-                    "Shape of You - Ed Sheeran",
-                    "Can't Stop the Feeling! - Justin Timberlake",
-                    "Uptown Funk - Mark Ronson ft. Bruno Mars",
-                    "Happy - Pharrell Williams",
-                    "Blinding Lights - The Weeknd",
-                    "Dance Monkey - Tones and I"
-                ];
+    document.addEventListener('DOMContentLoaded', function() {
+        const songInput = document.getElementById('songInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const message = document.getElementById('message');
+        const songsContainer = document.getElementById('songsContainer');
+        
+        // Ваш URL Google Apps Script
+        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbzA6t47hdDMrREs9lKsKm-bTMeLBb_UpaKtFUMPixMOZUbDhJU5S6CHm9xa6qO9UfPZ/exec";
+        
+        // Загрузка песен при открытии страницы
+        loadExistingSongs();
+        
+        // Функция загрузки песен из таблицы
+        async function loadExistingSongs() {
+            try {
+                const response = await fetch(googleScriptUrl);
+                const data = await response.json();
                 
-                demoData.forEach(song => {
-                    addSongToUI(song);
+                if (data.status === 'success') {
+                    songsContainer.innerHTML = '';
+                    data.songs.forEach(song => {
+                        addSongToUI(song);
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                // Показываем демо-данные если не удалось загрузить
+                showDemoSongs();
+            }
+        }
+        
+        // Функция добавления песни в список на странице
+        function addSongToUI(songName) {
+            const songItem = document.createElement('div');
+            songItem.className = 'song-item';
+            songItem.innerHTML = `
+                <i class="song-icon fas fa-music"></i>
+                <div class="song-text">${songName}</div>
+            `;
+            songsContainer.appendChild(songItem);
+        }
+        
+        // Демо-данные на случай ошибки
+        function showDemoSongs() {
+            const demoData = [
+                "Shape of You - Ed Sheeran",
+                "Can't Stop the Feeling! - Justin Timberlake",
+                "Uptown Funk - Mark Ronson ft. Bruno Mars"
+            ];
+            
+            songsContainer.innerHTML = '';
+            demoData.forEach(song => {
+                addSongToUI(song);
+            });
+        }
+        
+        // Функция отправки новой песни
+        async function submitSong() {
+            const songName = songInput.value.trim();
+            
+            if (!songName) {
+                showMessage('Пожалуйста, введите название песни', 'error');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            
+            try {
+                const response = await fetch(googleScriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({song: songName})
                 });
-            }
-            
-            // Функция для добавления песни в UI
-            function addSongToUI(songName) {
-                const songItem = document.createElement('div');
-                songItem.className = 'song-item';
-                songItem.innerHTML = `
-                    <i class="song-icon fas fa-music"></i>
-                    <div class="song-text">${songName}</div>
-                `;
-                songsContainer.appendChild(songItem);
-            }
-            
-            // Обработка отправки формы
-            submitBtn.addEventListener('click', function() {
-                const songName = songInput.value.trim();
                 
-                if (!songName) {
-                    showMessage('Пожалуйста, введите название песни и исполнителя', 'error');
-                    songInput.focus();
-                    return;
-                }
+                const data = await response.json();
                 
-                // Отключаем кнопку на время отправки
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-                
-                // Эмуляция отправки в Google Таблицы
-                setTimeout(() => {
-                    // В реальном приложении:
-                    // fetch(googleScriptUrl, {
-                    //     method: 'POST',
-                    //     body: JSON.stringify({song: songName}),
-                    //     headers: {'Content-Type': 'application/json'}
-                    // })
-                    
-                    // Добавляем песню в UI
-                    addSongToUI(songName);
-                    
-                    // Показываем сообщение об успехе
-                    showMessage(`Спасибо! Песня "<strong>${songName}</strong>" обязательно заиграет на танцевальной паузе!`, 'success');
-                    
-                    // Очищаем поле ввода
+                if (data.status === 'success') {
+                    showMessage(`Спасибо! Песня "${songName}" добавлена!`, 'success');
                     songInput.value = '';
-                    songInput.focus();
-                    
-                    // Восстанавливаем кнопку
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-                }, 1500);
-            });
-            
-            // Обработка нажатия Enter
-            songInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    submitBtn.click();
+                    loadExistingSongs(); // Обновляем список
+                } else {
+                    throw new Error(data.message || 'Ошибка сервера');
                 }
-            });
-            
-            // Функция показа сообщений
-            function showMessage(text, type) {
-                message.innerHTML = text;
-                message.className = 'message ' + type;
-                message.style.display = 'block';
-                
-                // Автоматическое скрытие сообщения через 5 секунд
-                setTimeout(function() {
-                    message.style.display = 'none';
-                }, 5000);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showMessage('Не удалось добавить песню: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
             }
+        }
+        
+        // Обработчики событий
+        submitBtn.addEventListener('click', submitSong);
+        
+        songInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') submitSong();
         });
-    </script>
+        
+        // Показать сообщение
+        function showMessage(text, type) {
+            message.innerHTML = text;
+            message.className = 'message ' + type;
+            message.style.display = 'block';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
 </body>
 </html>
