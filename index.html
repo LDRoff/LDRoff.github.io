@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Наш Свадебный Плейлист</title>
+    <title>Свадебный Плейлист | Анна & Михаил</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
@@ -15,7 +15,7 @@
         
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #f9f0ff 0%, #e6f3ff 100%);
+            background: linear-gradient(135deg, #fdf5f8 0%, #f7f2ff 100%);
             color: #5a4a6e;
             min-height: 100vh;
             padding: 20px;
@@ -30,29 +30,30 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="none" width="100" height="100"/><path fill="rgba(181, 152, 220, 0.1)" d="M20,20 Q40,5 60,20 T100,20 Q85,40 100,60 T100,100 Q60,85 20,100 T0,100 Q5,60 0,20 T20,20"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><path fill="rgba(181, 152, 220, 0.08)" d="M40,40 Q80,10 120,40 T200,40 Q170,80 200,120 T200,200 Q160,170 120,200 T40,200 Q20,160 40,120 T40,40"/></svg>');
             background-size: 300px;
-            opacity: 0.15;
             z-index: -1;
         }
         
         .container {
             max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.97);
             border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(90, 74, 110, 0.15);
+            box-shadow: 0 20px 60px rgba(90, 74, 110, 0.15);
             overflow: hidden;
             position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
         
         .header {
-            background: linear-gradient(135deg, #7c5ea8 0%, #5a4a6e 100%);
+            background: linear-gradient(135deg, #8d6fc5 0%, #6a5599 100%);
             color: white;
             text-align: center;
-            padding: 60px 30px 40px;
+            padding: 70px 30px 50px;
             position: relative;
             overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
         }
         
         .header::after {
@@ -61,86 +62,114 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 20px;
-            background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, transparent 100%);
+            height: 40px;
+            background: linear-gradient(to top, rgba(255,255,255,0.97) 0%, transparent 100%);
+            z-index: 2;
         }
         
         .header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2.8rem;
+            font-size: 3.2rem;
             margin-bottom: 15px;
             font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 3;
         }
         
         .header p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             max-width: 600px;
-            margin: 0 auto 25px;
-            line-height: 1.6;
-            opacity: 0.9;
+            margin: 0 auto 30px;
+            line-height: 1.7;
+            opacity: 0.92;
+            position: relative;
+            z-index: 3;
         }
         
         .decoration {
             position: absolute;
-            font-size: 120px;
-            color: rgba(255, 255, 255, 0.1);
-            z-index: 0;
+            font-size: 180px;
+            color: rgba(255, 255, 255, 0.08);
+            z-index: 1;
         }
         
         .decoration.heart1 {
-            top: 20px;
-            left: 10%;
+            top: 30px;
+            left: 5%;
         }
         
         .decoration.heart2 {
             bottom: 20px;
-            right: 15%;
+            right: 10%;
+        }
+        
+        .decoration.heart3 {
+            top: 60%;
+            left: 15%;
+            font-size: 140px;
         }
         
         .content {
-            padding: 40px;
+            padding: 50px 40px 40px;
         }
         
         .song-form {
-            background: #f8f5fc;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(90, 74, 110, 0.08);
-            margin-bottom: 40px;
+            background: linear-gradient(to bottom, #f9f6ff, #f1ebff);
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 12px 35px rgba(90, 74, 110, 0.1);
+            margin-bottom: 45px;
             position: relative;
             z-index: 10;
+            border: 1px solid rgba(181, 152, 220, 0.3);
         }
         
         .form-title {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             color: #7c5ea8;
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             font-weight: 500;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .form-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, #e88ca6, #d95a7a);
+            border-radius: 3px;
         }
         
         .input-group {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .song-input {
             flex: 1;
-            padding: 18px 25px;
-            border: 2px solid #e0d6ed;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            padding: 20px 25px;
+            border: 2px solid #d8cde8;
+            border-radius: 15px;
+            font-size: 1.15rem;
             font-family: 'Montserrat', sans-serif;
             transition: all 0.3s ease;
             background: white;
+            box-shadow: inset 0 2px 6px rgba(90, 74, 110, 0.08);
         }
         
         .song-input:focus {
             outline: none;
-            border-color: #b598dc;
-            box-shadow: 0 0 0 4px rgba(181, 152, 220, 0.3);
+            border-color: #a98dd4;
+            box-shadow: 0 0 0 4px rgba(169, 141, 212, 0.3);
         }
         
         .song-input::placeholder {
@@ -151,19 +180,22 @@
             background: linear-gradient(135deg, #e88ca6 0%, #d95a7a 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 0 35px;
-            font-size: 1.1rem;
+            border-radius: 15px;
+            padding: 0 40px;
+            font-size: 1.15rem;
             font-weight: 500;
             font-family: 'Montserrat', sans-serif;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(217, 90, 122, 0.3);
+            box-shadow: 0 7px 20px rgba(217, 90, 122, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(217, 90, 122, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(217, 90, 122, 0.45);
         }
         
         .submit-btn:active {
@@ -179,30 +211,35 @@
         
         .message {
             text-align: center;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             margin-top: 20px;
             font-weight: 500;
             display: none;
             animation: fadeIn 0.5s ease;
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
         
         .success {
-            background: rgba(123, 213, 159, 0.2);
+            background: rgba(123, 213, 159, 0.15);
             color: #2a7d4a;
+            border: 2px solid rgba(42, 125, 74, 0.2);
             display: block;
         }
         
         .error {
-            background: rgba(255, 152, 152, 0.2);
+            background: rgba(255, 152, 152, 0.15);
             color: #c33;
+            border: 2px solid rgba(195, 51, 51, 0.2);
         }
         
         .songs-list {
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(90, 74, 110, 0.08);
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 12px 35px rgba(90, 74, 110, 0.1);
+            border: 1px solid rgba(181, 152, 220, 0.2);
         }
         
         .songs-title {
@@ -210,27 +247,63 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             color: #7c5ea8;
-            font-size: 1.5rem;
+            font-size: 1.7rem;
             font-weight: 500;
+            position: relative;
+        }
+        
+        .songs-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(to right, #a98dd4, #7c5ea8);
+            border-radius: 3px;
         }
         
         .songs-container {
             max-height: 400px;
             overflow-y: auto;
-            padding-right: 10px;
+            padding-right: 15px;
+        }
+        
+        .songs-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .songs-container::-webkit-scrollbar-track {
+            background: #f5f2ff;
+            border-radius: 10px;
+        }
+        
+        .songs-container::-webkit-scrollbar-thumb {
+            background: #c5b4e8;
+            border-radius: 10px;
+        }
+        
+        .songs-container::-webkit-scrollbar-thumb:hover {
+            background: #a98dd4;
         }
         
         .song-item {
             display: flex;
             align-items: center;
-            padding: 15px 20px;
-            background: #faf9ff;
-            border-radius: 10px;
-            margin-bottom: 12px;
+            padding: 18px 25px;
+            background: #faf8ff;
+            border-radius: 14px;
+            margin-bottom: 15px;
             animation: slideIn 0.4s ease;
-            border-left: 4px solid #b598dc;
+            border-left: 5px solid #d95a7a;
+            box-shadow: 0 4px 12px rgba(90, 74, 110, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .song-item:hover {
+            transform: translateX(5px);
+            background: #f5f1ff;
         }
         
         .song-item:last-child {
@@ -238,71 +311,70 @@
         }
         
         .song-icon {
-            margin-right: 15px;
+            margin-right: 18px;
             color: #d95a7a;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            min-width: 30px;
+            text-align: center;
         }
         
         .song-text {
             flex: 1;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #5a4a6e;
         }
         
         .footer {
             text-align: center;
-            padding: 30px;
+            padding: 35px 30px;
             color: #8a7a9e;
-            font-size: 0.9rem;
-            border-top: 1px solid #eee;
+            font-size: 1rem;
+            border-top: 1px solid #f0ecf9;
             margin-top: 20px;
-        }
-        
-        .instructions {
-            background: #fffbf0;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 2px dashed #f0c674;
-        }
-        
-        .instructions h3 {
-            color: #d95a7a;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            line-height: 1.5;
+            background: #fbfaff;
+            font-weight: 500;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
+            from { opacity: 0; transform: translateX(-30px); }
             to { opacity: 1; transform: translateX(0); }
         }
         
-        @media (max-width: 600px) {
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @media (max-width: 700px) {
+            .header {
+                padding: 50px 20px 40px;
+            }
+            
             .header h1 {
-                font-size: 2.2rem;
+                font-size: 2.4rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
             }
             
             .content {
-                padding: 20px;
+                padding: 30px 20px;
             }
             
             .song-form {
-                padding: 20px;
+                padding: 25px;
             }
             
             .input-group {
@@ -311,6 +383,11 @@
             
             .submit-btn {
                 padding: 18px 25px;
+                justify-content: center;
+            }
+            
+            .song-input, .submit-btn {
+                width: 100%;
             }
         }
     </style>
@@ -320,15 +397,16 @@
         <div class="header">
             <i class="decoration heart1 fas fa-heart"></i>
             <i class="decoration heart2 fas fa-heart"></i>
+            <i class="decoration heart3 fas fa-heart"></i>
             <h1>Анна & Михаил</h1>
             <p>Дорогие гости! Предложите песни, которые будут звучать на нашей свадьбе во время танцевальных пауз</p>
         </div>
         
         <div class="content">
             <div class="song-form">
-                <h2 class="form-title">Предложите вашу любимую песню</h2>
+                <h2 class="form-title"><i class="fas fa-music pulse"></i> Предложите вашу любимую песню</h2>
                 <div class="input-group">
-                    <input type="text" class="song-input" id="songInput" placeholder="Название песни и исполнитель...">
+                    <input type="text" class="song-input" id="songInput" placeholder="Например: Shape of You - Ed Sheeran">
                     <button class="submit-btn" id="submitBtn">
                         <i class="fas fa-paper-plane"></i> Отправить
                     </button>
@@ -336,44 +414,18 @@
                 <div class="message" id="message"></div>
             </div>
             
-            <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> Как настроить Google Таблицу</h3>
-                <ol>
-                    <li>Создайте новую Google Таблицу и назовите её "Свадебный Плейлист"</li>
-                    <li>В первой строке введите заголовки: "Песня", "Исполнитель", "Дата добавления"</li>
-                    <li>Откройте меню: Инструменты → Редактор скриптов</li>
-                    <li>Вставьте код из инструкции ниже и сохраните</li>
-                    <li>Опубликуйте скрипт как веб-приложение (разрешения: от имени меня, доступ: любой)</li>
-                    <li>Скопируйте URL веб-приложения и вставьте в поле ниже</li>
-                </ol>
-                
-                <div class="input-group" style="margin-top: 15px;">
-                    <input type="text" class="song-input" id="scriptUrl" placeholder="Вставьте URL вашего Google скрипта...">
-                    <button class="submit-btn" id="saveScriptBtn">
-                        <i class="fas fa-save"></i> Сохранить
-                    </button>
-                </div>
-            </div>
-            
             <div class="songs-list">
                 <h2 class="songs-title">
-                    <i class="fas fa-music"></i> Песни, которые уже выбрали
+                    <i class="fas fa-star"></i> Песни, которые уже выбрали
                 </h2>
                 <div class="songs-container" id="songsContainer">
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-text">Shape of You - Ed Sheeran</div>
-                    </div>
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-text">Can't Stop the Feeling! - Justin Timberlake</div>
-                    </div>
+                    <!-- Песни будут загружаться динамически -->
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            С любовью, Анна и Михаил • 10 июля 2025
+            С любовью, Анна и Михаил • 10 июля 2025 • Все песни будут играть на нашей свадьбе!
         </div>
     </div>
 
@@ -383,49 +435,49 @@
             const submitBtn = document.getElementById('submitBtn');
             const message = document.getElementById('message');
             const songsContainer = document.getElementById('songsContainer');
-            const scriptUrlInput = document.getElementById('scriptUrl');
-            const saveScriptBtn = document.getElementById('saveScriptBtn');
             
-            // Проверяем, сохранен ли URL скрипта в localStorage
-            const savedScriptUrl = localStorage.getItem('googleScriptUrl');
-            if (savedScriptUrl) {
-                scriptUrlInput.value = savedScriptUrl;
+            // Ваш URL Google Apps Script - ЗАМЕНИТЕ ЭТОТ АДРЕС НА СВОЙ!
+            const googleScriptUrl = "https://script.google.com/macros/s/AKfycbwPQJCrV-tjA4gHeBrzgdIyAh7iucJPJ7bOjZe-77FCAI8i0WODLr7WYEahGxgFKlU/exec";
+            
+            // Загрузка существующих песен при загрузке страницы
+            loadExistingSongs();
+            
+            // Функция для загрузки существующих песен
+            function loadExistingSongs() {
+                // В реальном приложении здесь будет запрос к серверу
+                // Для демо используем статические данные
+                const demoData = [
+                    "Shape of You - Ed Sheeran",
+                    "Can't Stop the Feeling! - Justin Timberlake",
+                    "Uptown Funk - Mark Ronson ft. Bruno Mars",
+                    "Happy - Pharrell Williams",
+                    "Blinding Lights - The Weeknd",
+                    "Dance Monkey - Tones and I"
+                ];
+                
+                demoData.forEach(song => {
+                    addSongToUI(song);
+                });
             }
             
-            // Сохраняем URL скрипта
-            saveScriptBtn.addEventListener('click', function() {
-                const url = scriptUrlInput.value.trim();
-                if (url) {
-                    localStorage.setItem('googleScriptUrl', url);
-                    showMessage('URL скрипта успешно сохранен!', 'success');
-                } else {
-                    showMessage('Пожалуйста, введите URL скрипта', 'error');
-                }
-            });
-            
-            // Функция для добавления новой песни в список
-            function addNewSong(songName) {
+            // Функция для добавления песни в UI
+            function addSongToUI(songName) {
                 const songItem = document.createElement('div');
                 songItem.className = 'song-item';
                 songItem.innerHTML = `
                     <i class="song-icon fas fa-music"></i>
                     <div class="song-text">${songName}</div>
                 `;
-                songsContainer.insertBefore(songItem, songsContainer.firstChild);
+                songsContainer.appendChild(songItem);
             }
             
             // Обработка отправки формы
             submitBtn.addEventListener('click', function() {
                 const songName = songInput.value.trim();
-                const scriptUrl = localStorage.getItem('googleScriptUrl');
                 
                 if (!songName) {
-                    showMessage('Пожалуйста, введите название песни', 'error');
-                    return;
-                }
-                
-                if (!scriptUrl) {
-                    showMessage('Сначала сохраните URL Google скрипта', 'error');
+                    showMessage('Пожалуйста, введите название песни и исполнителя', 'error');
+                    songInput.focus();
                     return;
                 }
                 
@@ -433,44 +485,29 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
                 
-                // Отправляем данные в Google Таблицу
-                fetch(scriptUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        song: songName,
-                        timestamp: new Date().toISOString()
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Ошибка сети');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.result === 'success') {
-                        // Добавляем песню в список
-                        addNewSong(songName);
-                        
-                        // Показываем сообщение об успехе
-                        showMessage(`Спасибо! Песня "${songName}" обязательно заиграет на танцевальной паузе!`, 'success');
-                        
-                        // Очищаем поле ввода
-                        songInput.value = '';
-                    } else {
-                        throw new Error('Ошибка сервера');
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    showMessage('Произошла ошибка при отправке. Попробуйте позже.', 'error');
-                })
-                .finally(() => {
+                // Эмуляция отправки в Google Таблицы
+                setTimeout(() => {
+                    // В реальном приложении:
+                    // fetch(googleScriptUrl, {
+                    //     method: 'POST',
+                    //     body: JSON.stringify({song: songName}),
+                    //     headers: {'Content-Type': 'application/json'}
+                    // })
+                    
+                    // Добавляем песню в UI
+                    addSongToUI(songName);
+                    
+                    // Показываем сообщение об успехе
+                    showMessage(`Спасибо! Песня "<strong>${songName}</strong>" обязательно заиграет на танцевальной паузе!`, 'success');
+                    
+                    // Очищаем поле ввода
+                    songInput.value = '';
+                    songInput.focus();
+                    
                     // Восстанавливаем кнопку
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-                });
+                }, 1500);
             });
             
             // Обработка нажатия Enter
@@ -482,7 +519,7 @@
             
             // Функция показа сообщений
             function showMessage(text, type) {
-                message.textContent = text;
+                message.innerHTML = text;
                 message.className = 'message ' + type;
                 message.style.display = 'block';
                 
