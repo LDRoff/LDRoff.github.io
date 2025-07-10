@@ -534,7 +534,7 @@
                 <div class="form-row">
                     <div class="form-column">
                         <input type="text" class="input-field" id="guestInput" placeholder="Ваше имя" required>
-                        <input type="text" class="input-field" id="songInput" placeholder="Песня и исполнитель (например: Shape of You - Ed Sheeran)" required>
+                        <input type="text" class="input-field" id="songInput" placeholder="Песня и исполнитель" required>
                         <button class="submit-btn" id="submitBtn">
                             <i class="fas fa-paper-plane"></i> Отправить
                         </button>
@@ -549,9 +549,9 @@
                 </h2>
                 <div class="songs-container" id="songsContainer">
                     <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
+                        <i class="song-icon fas fa-spinner fa-spin"></i>
                         <div class="song-details">
-                            <div class="song-text">Загрузка песен...</div>
+                            <div class="song-text">Загружаем список песен...</div>
                         </div>
                     </div>
                 </div>
@@ -571,38 +571,39 @@
             const message = document.getElementById('message');
             const songsContainer = document.getElementById('songsContainer');
             
-            // Замените на ваш URL Google Apps Script
+            // Замените на ваш Google Apps Script URL
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
             
             // Загружаем песни при загрузке страницы
             loadSongs();
             
-            // Функция для загрузки песен из таблицы
+            // Функция для загрузки песен
             function loadSongs() {
-                // Используем JSONP для обхода CORS
+                // Создаем уникальное имя функции обратного вызова
                 const callbackName = 'jsonp_callback_' + Date.now();
                 const script = document.createElement('script');
                 
+                // Создаем глобальную функцию для обработки ответа
                 window[callbackName] = function(data) {
+                    // Удаляем временные элементы
                     delete window[callbackName];
                     document.body.removeChild(script);
                     
                     // Очищаем контейнер
                     songsContainer.innerHTML = '';
                     
-                    // Добавляем песни в обратном порядке (новые сверху)
-                    data.reverse().forEach(song => {
-                        addSongToDOM(song.guestName, song.songName);
-                    });
-                    
-                    // Если нет песен, показываем сообщение
-                    if (data.length === 0) {
+                    // Проверяем, есть ли данные
+                    if (data && data.length > 0) {
+                        // Добавляем песни в обратном порядке (новые сверху)
+                        data.reverse().forEach(song => {
+                            addSongToDOM(song.guestName, song.songName);
+                        });
+                    } else {
+                        // Если нет песен, показываем сообщение
                         songsContainer.innerHTML = `
                             <div class="song-item">
-                                <div class="song-details" style="text-align: center; width: 100%;">
-                                    <div class="song-text" style="color: #7a8d77; font-weight: normal;">
-                                        Пока никто не добавил песни. Будьте первым!
-                                    </div>
+                                <div class="song-details">
+                                    <div class="song-text">Пока нет предложенных песен. Будьте первым!</div>
                                 </div>
                             </div>
                         `;
@@ -638,73 +639,57 @@
                     return;
                 }
                 
-                // Показываем оптимистичный UI
+                // Оптимистично добавляем песню в список
                 addSongToDOM(guestName, songName);
                 showMessage(`Спасибо, ${guestName}! Песня "${songName}" отправлена`, 'success');
                 
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+                // Отправляем данные через iframe метод
+                sendToGoogleSheets(guestName, songName);
                 
-                // Отправляем данные в Google Таблицу через прокси
-                sendToGoogleSheets(guestName, songName)
-                    .then(() => {
-                        showMessage(`Спасибо, ${guestName}! Песня "<strong>${songName}</strong>" добавлена в наш плейлист!`, 'success');
-                        guestInput.value = '';
-                        songInput.value = '';
-                    })
-                    .catch(error => {
-                        console.error('Ошибка при отправке:', error);
-                        showMessage('Произошла ошибка при добавлении песни. Пожалуйста, попробуйте позже.', 'error');
-                    })
-                    .finally(() => {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-                    });
+                // Очищаем поля
+                guestInput.value = '';
+                songInput.value = '';
             });
             
-            // Функция для отправки данных в Google Таблицы
+            // Функция для отправки данных в Google Таблицы через iframe
             function sendToGoogleSheets(guestName, songName) {
-                return new Promise((resolve, reject) => {
-                    const formData = new FormData();
-                    formData.append('guestName', guestName);
-                    formData.append('songName', songName);
-                    
-                    // Создаем скрытый iframe для отправки данных
-                    const iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    iframe.name = 'google-sheets-iframe-' + Date.now();
-                    
-                    // Создаем форму
-                    const form = document.createElement('form');
-                    form.action = GOOGLE_SCRIPT_URL;
-                    form.method = 'POST';
-                    form.target = iframe.name;
-                    
-                    // Добавляем поля
-                    const guestInput = document.createElement('input');
-                    guestInput.type = 'hidden';
-                    guestInput.name = 'guestName';
-                    guestInput.value = guestName;
-                    form.appendChild(guestInput);
-                    
-                    const songInput = document.createElement('input');
-                    songInput.type = 'hidden';
-                    songInput.name = 'songName';
-                    songInput.value = songName;
-                    form.appendChild(songInput);
-                    
-                    // Добавляем в DOM и отправляем
-                    document.body.appendChild(iframe);
-                    document.body.appendChild(form);
-                    form.submit();
-                    
-                    // Очищаем через некоторое время
-                    setTimeout(() => {
-                        document.body.removeChild(iframe);
-                        document.body.removeChild(form);
-                        resolve();
-                    }, 3000);
-                });
+                // Создаем скрытый iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.name = 'hidden-iframe-' + Date.now();
+                
+                // Создаем форму
+                const form = document.createElement('form');
+                form.action = GOOGLE_SCRIPT_URL;
+                form.method = 'POST';
+                form.target = iframe.name;
+                form.style.display = 'none';
+                
+                // Создаем скрытые поля для данных
+                const guestInput = document.createElement('input');
+                guestInput.type = 'hidden';
+                guestInput.name = 'guestName';
+                guestInput.value = guestName;
+                form.appendChild(guestInput);
+                
+                const songInput = document.createElement('input');
+                songInput.type = 'hidden';
+                songInput.name = 'songName';
+                songInput.value = songName;
+                form.appendChild(songInput);
+                
+                // Добавляем элементы в DOM
+                document.body.appendChild(iframe);
+                document.body.appendChild(form);
+                
+                // Отправляем форму
+                form.submit();
+                
+                // Удаляем элементы через некоторое время
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    document.body.removeChild(form);
+                }, 5000);
             }
             
             // Обработка нажатия Enter
