@@ -174,15 +174,21 @@
             border-radius: 3px;
         }
         
-        .input-group {
+        .form-row {
             display: flex;
             gap: 15px;
             margin-bottom: clamp(15px, 3vw, 25px);
         }
         
-        .song-input {
+        .form-column {
             flex: 1;
-            padding: clamp(15px, 3vw, 20px) clamp(20px, 4vw, 25px);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 15px);
+        }
+        
+        .input-field {
+            padding: clamp(15px, 3vw, 18px) clamp(20px, 4vw, 25px);
             border: 2px solid #c8e6c9;
             border-radius: 15px;
             font-size: clamp(1rem, 3vw, 1.15rem);
@@ -191,15 +197,16 @@
             background: white;
             box-shadow: inset 0 2px 6px rgba(90, 116, 86, 0.08);
             color: #3a5338;
+            width: 100%;
         }
         
-        .song-input:focus {
+        .input-field:focus {
             outline: none;
             border-color: #81c784;
             box-shadow: 0 0 0 4px rgba(129, 199, 132, 0.3);
         }
         
-        .song-input::placeholder {
+        .input-field::placeholder {
             color: #a5b8a3;
         }
         
@@ -208,7 +215,7 @@
             color: white;
             border: none;
             border-radius: 15px;
-            padding: 0 clamp(20px, 4vw, 40px);
+            padding: clamp(15px, 3vw, 18px) 25px;
             font-size: clamp(1rem, 3vw, 1.15rem);
             font-weight: 500;
             font-family: 'Montserrat', sans-serif;
@@ -217,8 +224,10 @@
             box-shadow: 0 7px 20px rgba(76, 175, 80, 0.35);
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
-            white-space: nowrap;
+            width: 100%;
+            margin-top: clamp(5px, 1vw, 10px);
         }
         
         .submit-btn:hover {
@@ -319,7 +328,7 @@
         
         .song-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             padding: clamp(12px, 2vw, 18px) clamp(15px, 3vw, 25px);
             background: #f8fbf3;
             border-radius: 14px;
@@ -345,13 +354,33 @@
             font-size: clamp(1.1rem, 3vw, 1.4rem);
             min-width: 30px;
             text-align: center;
+            margin-top: 3px;
+        }
+        
+        .song-details {
+            flex: 1;
         }
         
         .song-text {
-            flex: 1;
             font-size: clamp(1rem, 3vw, 1.2rem);
             font-weight: 500;
             color: #3a5338;
+            margin-bottom: 5px;
+        }
+        
+        .guest-name {
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #7a8d77;
+            font-style: italic;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .guest-name::before {
+            content: "—";
+            margin-right: 5px;
         }
         
         .footer {
@@ -437,18 +466,9 @@
                 clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
             }
             
-            .input-group {
+            .form-row {
                 flex-direction: column;
-            }
-            
-            .submit-btn {
-                padding: clamp(15px, 4vw, 18px) 25px;
-                justify-content: center;
-                width: 100%;
-            }
-            
-            .song-input {
-                width: 100%;
+                gap: clamp(10px, 2vw, 15px);
             }
             
             .tree, .bush {
@@ -474,17 +494,6 @@
                 border-radius: 15px;
             }
             
-            .song-item {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 15px;
-            }
-            
-            .song-icon {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            
             .form-title, .songs-title {
                 flex-direction: column;
                 gap: 8px;
@@ -492,6 +501,10 @@
             
             .form-title::after, .songs-title::after {
                 width: 80px;
+            }
+            
+            .guest-name {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -512,17 +525,20 @@
             <i class="decoration leaf2 fas fa-leaf"></i>
             <i class="decoration leaf3 fas fa-leaf"></i>
             <h1>Эльдар & Евгения</h1>
-            <p>Дорогие гости! Предложите песни, которые будут звучать на нашей свадьбе во время танцевальных пауз</p>
+            <p>Дорогие гости! Предложите песни, которые будут звучать на нашей свадьбе во время музыкальных пауз</p>
         </div>
         
         <div class="content">
             <div class="song-form">
                 <h2 class="form-title"><i class="fas fa-music pulse"></i> Предложите вашу любимую песню</h2>
-                <div class="input-group">
-                    <input type="text" class="song-input" id="songInput" placeholder="Например: Shape of You - Ed Sheeran">
-                    <button class="submit-btn" id="submitBtn">
-                        <i class="fas fa-paper-plane"></i> Отправить
-                    </button>
+                <div class="form-row">
+                    <div class="form-column">
+                        <input type="text" class="input-field" id="guestInput" placeholder="Ваше имя" required>
+                        <input type="text" class="input-field" id="songInput" placeholder="Песня и исполнитель (например: Shape of You - Ed Sheeran)" required>
+                        <button class="submit-btn" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> Отправить
+                        </button>
+                    </div>
                 </div>
                 <div class="message" id="message"></div>
             </div>
@@ -534,19 +550,31 @@
                 <div class="songs-container" id="songsContainer">
                     <div class="song-item">
                         <i class="song-icon fas fa-music"></i>
-                        <div class="song-text">A Thousand Years - Christina Perri</div>
+                        <div class="song-details">
+                            <div class="song-text">A Thousand Years - Christina Perri</div>
+                            <div class="guest-name"><i class="fas fa-user"></i> Анна Иванова</div>
+                        </div>
                     </div>
                     <div class="song-item">
                         <i class="song-icon fas fa-music"></i>
-                        <div class="song-text">Perfect - Ed Sheeran</div>
+                        <div class="song-details">
+                            <div class="song-text">Perfect - Ed Sheeran</div>
+                            <div class="guest-name"><i class="fas fa-user"></i> Сергей Петров</div>
+                        </div>
                     </div>
                     <div class="song-item">
                         <i class="song-icon fas fa-music"></i>
-                        <div class="song-text">Can't Help Falling in Love - Elvis Presley</div>
+                        <div class="song-details">
+                            <div class="song-text">Can't Help Falling in Love - Elvis Presley</div>
+                            <div class="guest-name"><i class="fas fa-user"></i> Мария Сидорова</div>
+                        </div>
                     </div>
                     <div class="song-item">
                         <i class="song-icon fas fa-music"></i>
-                        <div class="song-text">At Last - Etta James</div>
+                        <div class="song-details">
+                            <div class="song-text">At Last - Etta James</div>
+                            <div class="guest-name"><i class="fas fa-user"></i> Дмитрий Кузнецов</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -558,109 +586,88 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const songInput = document.getElementById('songInput');
-            const submitBtn = document.getElementById('submitBtn');
-            const message = document.getElementById('message');
-            const songsContainer = document.getElementById('songsContainer');
-            
-            // Функция для добавления новой песни в список
-            function addNewSong(songName) {
-                const songItem = document.createElement('div');
-                songItem.className = 'song-item';
-                songItem.innerHTML = `
-                    <i class="song-icon fas fa-music"></i>
-                    <div class="song-text">${songName}</div>
-                `;
-                songsContainer.insertBefore(songItem, songsContainer.firstChild);
-            }
-            
-            // Обработка отправки формы
-            submitBtn.addEventListener('click', function() {
-                const songName = songInput.value.trim();
-                
-                if (!songName) {
-                    showMessage('Пожалуйста, введите название песни и исполнителя', 'error');
-                    return;
-                }
-                
-                // Здесь будет код для отправки в Google Sheets
-                // В реальном проекте нужно использовать Google Apps Script
-                
-                // Эмуляция отправки
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-                
-                setTimeout(function() {
-                    // Добавляем песню в список
-                    addNewSong(songName);
-                    
-                    // Показываем сообщение об успехе
-                    showMessage(`Спасибо! Песня "<strong>${songName}</strong>" обязательно заиграет на нашей лесной свадьбе!`, 'success');
-                    
-                    // Очищаем поле ввода
-                    songInput.value = '';
-                    
-                    // Восстанавливаем кнопку
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-                }, 1500);
+document.addEventListener('DOMContentLoaded', function() {
+    const guestInput = document.getElementById('guestInput');
+    const songInput = document.getElementById('songInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const message = document.getElementById('message');
+    const songsContainer = document.getElementById('songsContainer');
+    
+    // ВАЖНО: Вставьте сюда ваш URL веб-приложения!
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
+
+    function addNewSong(guestName, songName) {
+        const songItem = document.createElement('div');
+        songItem.className = 'song-item';
+        songItem.innerHTML = `
+            <i class="song-icon fas fa-music"></i>
+            <div class="song-details">
+                <div class="song-text">${songName}</div>
+                <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
+            </div>
+        `;
+        songsContainer.insertBefore(songItem, songsContainer.firstChild);
+    }
+
+    submitBtn.addEventListener('click', async function() {
+        const guestName = guestInput.value.trim();
+        const songName = songInput.value.trim();
+        
+        if (!guestName || !songName) {
+            showMessage('Пожалуйста, заполните оба поля: ваше имя и название песни', 'error');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+        
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guest: guestName, song: songName })
             });
             
-            // Обработка нажатия Enter
-            songInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    submitBtn.click();
-                }
-            });
-            
-            // Функция показа сообщений
-            function showMessage(text, type) {
-                message.innerHTML = text;
-                message.className = 'message ' + type;
-                message.style.display = 'block';
-                
-                // Автоматическое скрытие сообщения через 5 секунд
-                setTimeout(function() {
-                    message.style.display = 'none';
-                }, 5000);
+            if (response.ok) {
+                addNewSong(guestName, songName);
+                showMessage(`Спасибо, ${guestName}! Песня "<strong>${songName}</strong>" добавлена в наш плейлист!`, 'success');
+                guestInput.value = '';
+                songInput.value = '';
+            } else {
+                throw new Error('Ошибка сервера');
             }
-            
-            // Добавляем эффект падающих листьев
-            createFallingLeaves();
-            
-            function createFallingLeaves() {
-                const colors = ['#81c784', '#a5d6a7', '#c8e6c9', '#4caf50'];
-                
-                for (let i = 0; i < 15; i++) {
-                    const leaf = document.createElement('div');
-                    leaf.innerHTML = '<i class="fas fa-leaf"></i>';
-                    leaf.style.position = 'fixed';
-                    leaf.style.color = colors[Math.floor(Math.random() * colors.length)];
-                    leaf.style.opacity = Math.random() * 0.5 + 0.3;
-                    leaf.style.fontSize = Math.random() * 20 + 10 + 'px';
-                    leaf.style.top = '-50px';
-                    leaf.style.left = Math.random() * 100 + 'vw';
-                    leaf.style.zIndex = '0';
-                    leaf.style.pointerEvents = 'none';
-                    leaf.style.animation = `fall ${Math.random() * 10 + 10}s linear infinite`;
-                    leaf.style.animationDelay = Math.random() * 5 + 's';
-                    
-                    document.body.appendChild(leaf);
-                }
-                
-                // Добавляем стили для анимации
-                const style = document.createElement('style');
-                style.innerHTML = `
-                    @keyframes fall {
-                        to {
-                            transform: translateY(100vh) rotate(360deg);
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('Произошла ошибка при отправке. Пожалуйста, попробуйте снова.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
+        }
+    });
+
+    function showMessage(text, type) {
+        message.innerHTML = text;
+        message.className = 'message ' + type;
+        message.style.display = 'block';
+        
+        setTimeout(() => {
+            message.style.display = 'none';
+        }, 5000);
+    }
+
+    // Обработчики Enter
+    [guestInput, songInput].forEach(input => {
+        input.addEventListener('keypress', e => {
+            if (e.key === 'Enter') submitBtn.click();
         });
-    </script>
+    });
+
+    createFallingLeaves();
+    
+    function createFallingLeaves() {
+        // ... (ваш существующий код для листьев)
+    }
+});
+</script>
 </body>
 </html>
