@@ -565,177 +565,175 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    const guestInput = document.getElementById('guestInput');
-    const songInput = document.getElementById('songInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const message = document.getElementById('message');
-    const songsContainer = document.getElementById('songsContainer');
-    
-    // URL вашего Google Apps Script
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
-    
-    // Загружаем песни при загрузке страницы
-    loadSongs();
-    
-    // Функция для загрузки песен из таблицы
-    function loadSongs() {
-        fetch(GOOGLE_SCRIPT_URL + '?action=getSongs')
-            .then(response => response.json())
-            .then(data => {
-                // Очищаем контейнер
-                songsContainer.innerHTML = '';
-                
-                // Проверяем, есть ли данные
-                if (data && data.length > 0) {
-                    // Новые песни будут сверху (не используем reverse())
-                    data.forEach(song => {
-                        addSongToDOM(song.guestName, song.songName);
-                    });
-                } else {
-                    // Если нет песен, показываем сообщение
-                    songsContainer.innerHTML = `
-                        <div class="song-item">
-                            <div class="song-details">
-                                <div class="song-text">Пока нет предложенных песен. Будьте первым!</div>
+            const guestInput = document.getElementById('guestInput');
+            const songInput = document.getElementById('songInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const message = document.getElementById('message');
+            const songsContainer = document.getElementById('songsContainer');
+            
+            // URL вашего Google Apps Script
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHsJkdV52tzfyzok9uStnvkGyOLeysWtWxhqp74znZ7IbESxXmf-ipPqplhdQKdveJjg/exec';
+            
+            // Загружаем песни при загрузке страницы
+            loadSongs();
+            
+            // Функция для загрузки песен из таблицы
+            function loadSongs() {
+                fetch(GOOGLE_SCRIPT_URL + '?action=getSongs')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Очищаем контейнер
+                        songsContainer.innerHTML = '';
+                        
+                        // Проверяем, есть ли данные
+                        if (data && data.length > 0) {
+                            // Добавляем песни в обратном порядке (новые сверху)
+                            data.reverse().forEach(song => {
+                                addSongToDOM(song.guestName, song.songName);
+                            });
+                        } else {
+                            // Если нет песен, показываем сообщение
+                            songsContainer.innerHTML = `
+                                <div class="song-item">
+                                    <div class="song-details">
+                                        <div class="song-text">Пока нет предложенных песен. Будьте первым!</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке песен:', error);
+                        songsContainer.innerHTML = `
+                            <div class="song-item">
+                                <div class="song-details">
+                                    <div class="song-text">Не удалось загрузить список песен</div>
+                                </div>
                             </div>
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке песен:', error);
-                songsContainer.innerHTML = `
-                    <div class="song-item">
-                        <div class="song-details">
-                            <div class="song-text">Не удалось загрузить список песен</div>
-                        </div>
+                        `;
+                    });
+            }
+            
+            // Функция для добавления песни в DOM
+            function addSongToDOM(guestName, songName) {
+                const songItem = document.createElement('div');
+                songItem.className = 'song-item';
+                songItem.innerHTML = `
+                    <i class="song-icon fas fa-music"></i>
+                    <div class="song-details">
+                        <div class="song-text">${songName}</div>
+                        <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
                     </div>
                 `;
-            });
-    }
-    
-    // Функция для добавления песни в DOM (в начало списка)
-    function addSongToDOM(guestName, songName) {
-        const songItem = document.createElement('div');
-        songItem.className = 'song-item';
-        songItem.innerHTML = `
-            <i class="song-icon fas fa-music"></i>
-            <div class="song-details">
-                <div class="song-text">${songName}</div>
-                <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
-            </div>
-        `;
-        // Вставляем новую песню ПЕРВОЙ в списке
-        songsContainer.insertBefore(songItem, songsContainer.firstChild);
-    }
-    
-    // Обработка отправки формы
-    submitBtn.addEventListener('click', function() {
-        const guestName = guestInput.value.trim();
-        const songName = songInput.value.trim();
-        
-        if (!guestName || !songName) {
-            showMessage('Пожалуйста, заполните оба поля: ваше имя и название песни', 'error');
-            return;
-        }
-        
-        // Блокируем кнопку и показываем спиннер
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-        
-        // Отправляем данные в Google Таблицу
-        const formData = new FormData();
-        formData.append('action', 'addSong');
-        formData.append('guestName', guestName);
-        formData.append('songName', songName);
-        
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Добавляем песню в начало списка
-                addSongToDOM(guestName, songName);
-                showMessage(`Спасибо, ${guestName}! Песня "${songName}" добавлена в плейлист`, 'success');
-                
-                // Очищаем поля ввода
-                guestInput.value = '';
-                songInput.value = '';
-            } else {
-                showMessage('Произошла ошибка: ' + data.message, 'error');
+                songsContainer.appendChild(songItem);
             }
-        })
-        .catch(error => {
-            console.error('Ошибка при отправке:', error);
-            showMessage('Произошла ошибка при отправке. Пожалуйста, попробуйте позже', 'error');
-        })
-        .finally(() => {
-            // Восстанавливаем кнопку
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-        });
-    });
-    
-    // Обработка нажатия Enter
-    function handleEnter(e) {
-        if (e.key === 'Enter') {
-            submitBtn.click();
-        }
-    }
-    
-    guestInput.addEventListener('keypress', handleEnter);
-    songInput.addEventListener('keypress', handleEnter);
-    
-    // Функция показа сообщений
-    function showMessage(text, type) {
-        message.innerHTML = text;
-        message.className = 'message ' + type;
-        message.style.display = 'block';
-        
-        // Автоматическое скрытие сообщения через 5 секунд
-        setTimeout(function() {
-            message.style.display = 'none';
-        }, 5000);
-    }
-    
-    // Добавляем эффект падающих листьев
-    function createFallingLeaves() {
-        const colors = ['#81c784', '#a5d6a7', '#c8e6c9', '#4caf50'];
-        
-        for (let i = 0; i < 15; i++) {
-            const leaf = document.createElement('div');
-            leaf.innerHTML = '<i class="fas fa-leaf"></i>';
-            leaf.style.position = 'fixed';
-            leaf.style.color = colors[Math.floor(Math.random() * colors.length)];
-            leaf.style.opacity = Math.random() * 0.5 + 0.3;
-            leaf.style.fontSize = Math.random() * 20 + 10 + 'px';
-            leaf.style.top = '-50px';
-            leaf.style.left = Math.random() * 100 + 'vw';
-            leaf.style.zIndex = '0';
-            leaf.style.pointerEvents = 'none';
-            leaf.style.animation = `fall ${Math.random() * 10 + 10}s linear infinite`;
-            leaf.style.animationDelay = Math.random() * 5 + 's';
             
-            document.body.appendChild(leaf);
-        }
-        
-        // Добавляем стили для анимации
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes fall {
-                to {
-                    transform: translateY(100vh) rotate(360deg);
+            // Обработка отправки формы
+            submitBtn.addEventListener('click', function() {
+                const guestName = guestInput.value.trim();
+                const songName = songInput.value.trim();
+                
+                if (!guestName || !songName) {
+                    showMessage('Пожалуйста, заполните оба поля: ваше имя и название песни', 'error');
+                    return;
+                }
+                
+                // Блокируем кнопку и показываем спиннер
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+                
+                // Отправляем данные в Google Таблицу
+                const formData = new FormData();
+                formData.append('action', 'addSong');
+                formData.append('guestName', guestName);
+                formData.append('songName', songName);
+                
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Добавляем песню в список
+                        addSongToDOM(guestName, songName);
+                        showMessage(`Спасибо, ${guestName}! Песня "${songName}" добавлена в плейлист`, 'success');
+                        
+                        // Очищаем поля ввода
+                        guestInput.value = '';
+                        songInput.value = '';
+                    } else {
+                        showMessage('Произошла ошибка: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке:', error);
+                    showMessage('Произошла ошибка при отправке. Пожалуйста, попробуйте позже', 'error');
+                })
+                .finally(() => {
+                    // Восстанавливаем кнопку
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
+                });
+            });
+            
+            // Обработка нажатия Enter
+            function handleEnter(e) {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
                 }
             }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // Запускаем анимацию листьев
-    createFallingLeaves();
-});
+            
+            guestInput.addEventListener('keypress', handleEnter);
+            songInput.addEventListener('keypress', handleEnter);
+            
+            // Функция показа сообщений
+            function showMessage(text, type) {
+                message.innerHTML = text;
+                message.className = 'message ' + type;
+                message.style.display = 'block';
+                
+                // Автоматическое скрытие сообщения через 5 секунд
+                setTimeout(function() {
+                    message.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Добавляем эффект падающих листьев
+            createFallingLeaves();
+            
+            function createFallingLeaves() {
+                const colors = ['#81c784', '#a5d6a7', '#c8e6c9', '#4caf50'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.innerHTML = '<i class="fas fa-leaf"></i>';
+                    leaf.style.position = 'fixed';
+                    leaf.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    leaf.style.opacity = Math.random() * 0.5 + 0.3;
+                    leaf.style.fontSize = Math.random() * 20 + 10 + 'px';
+                    leaf.style.top = '-50px';
+                    leaf.style.left = Math.random() * 100 + 'vw';
+                    leaf.style.zIndex = '0';
+                    leaf.style.pointerEvents = 'none';
+                    leaf.style.animation = `fall ${Math.random() * 10 + 10}s linear infinite`;
+                    leaf.style.animationDelay = Math.random() * 5 + 's';
+                    
+                    document.body.appendChild(leaf);
+                }
+                
+                // Добавляем стили для анимации
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(360deg);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
     </script>
 </body>
 </html>
