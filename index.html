@@ -551,29 +551,7 @@
                     <div class="song-item">
                         <i class="song-icon fas fa-music"></i>
                         <div class="song-details">
-                            <div class="song-text">A Thousand Years - Christina Perri</div>
-                            <div class="guest-name"><i class="fas fa-user"></i> Анна Иванова</div>
-                        </div>
-                    </div>
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-details">
-                            <div class="song-text">Perfect - Ed Sheeran</div>
-                            <div class="guest-name"><i class="fas fa-user"></i> Сергей Петров</div>
-                        </div>
-                    </div>
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-details">
-                            <div class="song-text">Can't Help Falling in Love - Elvis Presley</div>
-                            <div class="guest-name"><i class="fas fa-user"></i> Мария Сидорова</div>
-                        </div>
-                    </div>
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-details">
-                            <div class="song-text">At Last - Etta James</div>
-                            <div class="guest-name"><i class="fas fa-user"></i> Дмитрий Кузнецов</div>
+                            <div class="song-text">Загрузка песен...</div>
                         </div>
                     </div>
                 </div>
@@ -586,166 +564,206 @@
     </div>
 
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const guestInput = document.getElementById('guestInput');
-    const songInput = document.getElementById('songInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const message = document.getElementById('message');
-    const songsContainer = document.getElementById('songsContainer');
-    
-    // Вставьте сюда URL вашего веб-приложения
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
-    
-    // Загружаем существующие песни при загрузке страницы
-    loadSongs();
-    
-    // Функция для загрузки песен из таблицы
-    function loadSongs() {
-        fetch(SCRIPT_URL)
-            .then(res => res.json())
-            .then(data => {
-                songsContainer.innerHTML = '';
-                data.reverse().forEach(song => {
-                    addSongToDOM(song.guestName, song.songName);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading songs:', error);
-                // Показываем примеры песен, если не удалось загрузить
-                songsContainer.innerHTML = `
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-details">
-                            <div class="song-text">A Thousand Years - Christina Perri</div>
-                            <div class="guest-name"><i class="fas fa-user"></i> Анна Иванова</div>
-                        </div>
-                    </div>
-                    <div class="song-item">
-                        <i class="song-icon fas fa-music"></i>
-                        <div class="song-details">
-                            <div class="song-text">Perfect - Ed Sheeran</div>
-                            <div class="guest-name"><i class="fas fa-user"></i> Сергей Петров</div>
-                        </div>
+        document.addEventListener('DOMContentLoaded', function() {
+            const guestInput = document.getElementById('guestInput');
+            const songInput = document.getElementById('songInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const message = document.getElementById('message');
+            const songsContainer = document.getElementById('songsContainer');
+            
+            // Замените на ваш URL Google Apps Script
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
+            
+            // Загружаем песни при загрузке страницы
+            loadSongs();
+            
+            // Функция для загрузки песен из таблицы
+            function loadSongs() {
+                // Используем JSONP для обхода CORS
+                const callbackName = 'jsonp_callback_' + Date.now();
+                const script = document.createElement('script');
+                
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    
+                    // Очищаем контейнер
+                    songsContainer.innerHTML = '';
+                    
+                    // Добавляем песни в обратном порядке (новые сверху)
+                    data.reverse().forEach(song => {
+                        addSongToDOM(song.guestName, song.songName);
+                    });
+                    
+                    // Если нет песен, показываем сообщение
+                    if (data.length === 0) {
+                        songsContainer.innerHTML = `
+                            <div class="song-item">
+                                <div class="song-details" style="text-align: center; width: 100%;">
+                                    <div class="song-text" style="color: #7a8d77; font-weight: normal;">
+                                        Пока никто не добавил песни. Будьте первым!
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                };
+                
+                // Создаем URL с callback
+                script.src = `${GOOGLE_SCRIPT_URL}?callback=${callbackName}`;
+                document.body.appendChild(script);
+            }
+            
+            // Функция для добавления песни в DOM
+            function addSongToDOM(guestName, songName) {
+                const songItem = document.createElement('div');
+                songItem.className = 'song-item';
+                songItem.innerHTML = `
+                    <i class="song-icon fas fa-music"></i>
+                    <div class="song-details">
+                        <div class="song-text">${songName}</div>
+                        <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
                     </div>
                 `;
-            });
-    }
-    
-    // Функция для добавления песни в DOM
-    function addSongToDOM(guestName, songName) {
-        const songItem = document.createElement('div');
-        songItem.className = 'song-item';
-        songItem.innerHTML = `
-            <i class="song-icon fas fa-music"></i>
-            <div class="song-details">
-                <div class="song-text">${songName}</div>
-                <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
-            </div>
-        `;
-        songsContainer.insertBefore(songItem, songsContainer.firstChild);
-    }
-    
-    // Обработка отправки формы
-    submitBtn.addEventListener('click', function() {
-        const guestName = guestInput.value.trim();
-        const songName = songInput.value.trim();
-        
-        if (!guestName || !songName) {
-            showMessage('Пожалуйста, заполните оба поля: ваше имя и название песни', 'error');
-            return;
-        }
-        
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-        
-        // Отправляем данные в Google Таблицу
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                guestName: guestName,
-                songName: songName
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                addSongToDOM(guestName, songName);
-                showMessage(`Спасибо, ${guestName}! Песня "<strong>${songName}</strong>" добавлена в наш плейлист!`, 'success');
-                guestInput.value = '';
-                songInput.value = '';
-            } else {
-                showMessage('Произошла ошибка при добавлении песни. Пожалуйста, попробуйте позже.', 'error');
+                songsContainer.appendChild(songItem);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('Произошла ошибка при добавлении песни. Пожалуйста, попробуйте позже.', 'error');
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-            guestInput.focus();
-        });
-    });
-    
-    // Обработка нажатия Enter
-    function handleEnter(e) {
-        if (e.key === 'Enter') {
-            submitBtn.click();
-        }
-    }
-    
-    guestInput.addEventListener('keypress', handleEnter);
-    songInput.addEventListener('keypress', handleEnter);
-    
-    // Функция показа сообщений
-    function showMessage(text, type) {
-        message.innerHTML = text;
-        message.className = 'message ' + type;
-        message.style.display = 'block';
-        
-        setTimeout(function() {
-            message.style.display = 'none';
-        }, 5000);
-    }
-    
-    // Добавляем эффект падающих листьев
-    createFallingLeaves();
-    
-    function createFallingLeaves() {
-        const colors = ['#81c784', '#a5d6a7', '#c8e6c9', '#4caf50'];
-        
-        for (let i = 0; i < 15; i++) {
-            const leaf = document.createElement('div');
-            leaf.innerHTML = '<i class="fas fa-leaf"></i>';
-            leaf.style.position = 'fixed';
-            leaf.style.color = colors[Math.floor(Math.random() * colors.length)];
-            leaf.style.opacity = Math.random() * 0.5 + 0.3;
-            leaf.style.fontSize = Math.random() * 20 + 10 + 'px';
-            leaf.style.top = '-50px';
-            leaf.style.left = Math.random() * 100 + 'vw';
-            leaf.style.zIndex = '0';
-            leaf.style.pointerEvents = 'none';
-            leaf.style.animation = `fall ${Math.random() * 10 + 10}s linear infinite`;
-            leaf.style.animationDelay = Math.random() * 5 + 's';
             
-            document.body.appendChild(leaf);
-        }
-        
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes fall {
-                to {
-                    transform: translateY(100vh) rotate(360deg);
+            // Обработка отправки формы
+            submitBtn.addEventListener('click', function() {
+                const guestName = guestInput.value.trim();
+                const songName = songInput.value.trim();
+                
+                if (!guestName || !songName) {
+                    showMessage('Пожалуйста, заполните оба поля: ваше имя и название песни', 'error');
+                    return;
+                }
+                
+                // Показываем оптимистичный UI
+                addSongToDOM(guestName, songName);
+                showMessage(`Спасибо, ${guestName}! Песня "${songName}" отправлена`, 'success');
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+                
+                // Отправляем данные в Google Таблицу через прокси
+                sendToGoogleSheets(guestName, songName)
+                    .then(() => {
+                        showMessage(`Спасибо, ${guestName}! Песня "<strong>${songName}</strong>" добавлена в наш плейлист!`, 'success');
+                        guestInput.value = '';
+                        songInput.value = '';
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при отправке:', error);
+                        showMessage('Произошла ошибка при добавлении песни. Пожалуйста, попробуйте позже.', 'error');
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
+                    });
+            });
+            
+            // Функция для отправки данных в Google Таблицы
+            function sendToGoogleSheets(guestName, songName) {
+                return new Promise((resolve, reject) => {
+                    const formData = new FormData();
+                    formData.append('guestName', guestName);
+                    formData.append('songName', songName);
+                    
+                    // Создаем скрытый iframe для отправки данных
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.name = 'google-sheets-iframe-' + Date.now();
+                    
+                    // Создаем форму
+                    const form = document.createElement('form');
+                    form.action = GOOGLE_SCRIPT_URL;
+                    form.method = 'POST';
+                    form.target = iframe.name;
+                    
+                    // Добавляем поля
+                    const guestInput = document.createElement('input');
+                    guestInput.type = 'hidden';
+                    guestInput.name = 'guestName';
+                    guestInput.value = guestName;
+                    form.appendChild(guestInput);
+                    
+                    const songInput = document.createElement('input');
+                    songInput.type = 'hidden';
+                    songInput.name = 'songName';
+                    songInput.value = songName;
+                    form.appendChild(songInput);
+                    
+                    // Добавляем в DOM и отправляем
+                    document.body.appendChild(iframe);
+                    document.body.appendChild(form);
+                    form.submit();
+                    
+                    // Очищаем через некоторое время
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                        document.body.removeChild(form);
+                        resolve();
+                    }, 3000);
+                });
+            }
+            
+            // Обработка нажатия Enter
+            function handleEnter(e) {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
                 }
             }
-        `;
-        document.head.appendChild(style);
-    }
-});
-</script>
+            
+            guestInput.addEventListener('keypress', handleEnter);
+            songInput.addEventListener('keypress', handleEnter);
+            
+            // Функция показа сообщений
+            function showMessage(text, type) {
+                message.innerHTML = text;
+                message.className = 'message ' + type;
+                message.style.display = 'block';
+                
+                // Автоматическое скрытие сообщения через 5 секунд
+                setTimeout(function() {
+                    message.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Добавляем эффект падающих листьев
+            createFallingLeaves();
+            
+            function createFallingLeaves() {
+                const colors = ['#81c784', '#a5d6a7', '#c8e6c9', '#4caf50'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.innerHTML = '<i class="fas fa-leaf"></i>';
+                    leaf.style.position = 'fixed';
+                    leaf.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    leaf.style.opacity = Math.random() * 0.5 + 0.3;
+                    leaf.style.fontSize = Math.random() * 20 + 10 + 'px';
+                    leaf.style.top = '-50px';
+                    leaf.style.left = Math.random() * 100 + 'vw';
+                    leaf.style.zIndex = '0';
+                    leaf.style.pointerEvents = 'none';
+                    leaf.style.animation = `fall ${Math.random() * 10 + 10}s linear infinite`;
+                    leaf.style.animationDelay = Math.random() * 5 + 's';
+                    
+                    document.body.appendChild(leaf);
+                }
+                
+                // Добавляем стили для анимации
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(360deg);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    </script>
 </body>
 </html>
