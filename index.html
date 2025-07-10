@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const songsContainer = document.getElementById('songsContainer');
     
     // Ваш URL Google Apps Script
-    const googleScriptUrl = "https://script.google.com/macros/s/AKfycbxdZhoDtAxwpfSFGPuD3dkwH5VbbBp2qwI08Msn0tZzVQeS5o6nTK5_8riQdzq7_xlW/exec";
+    const googleScriptUrl = "https://script.google.com/macros/s/AKfycbwdw1nRkYFw1w_yc0LF-QrHpKJFOl3MklumEhMLgqfEolBcqPmYekzeXkrNNRt4t5J3/exec";
     
     // Загрузка песен при открытии страницы
     loadExistingSongs();
@@ -445,8 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция загрузки существующих песен
     async function loadExistingSongs() {
         try {
-            // Добавляем параметр для предотвращения кэширования
-            const response = await fetch(`${googleScriptUrl}?t=${Date.now()}`);
+            // Используем GET-запрос с параметром для предотвращения кэширования
+            const response = await fetch(`${googleScriptUrl}?action=getSongs&t=${Date.now()}`);
             const data = await response.json();
             
             if (data.status === 'success') {
@@ -457,7 +457,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Ошибка загрузки песен:', error);
-            // Показываем демо-данные при ошибке
             showDemoSongs();
         }
     }
@@ -487,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Функция отправки новой песни (с обработкой CORS)
+    // Функция отправки новой песни (без CORS-прокси)
     async function submitSong() {
         const songName = songInput.value.trim();
         
@@ -501,30 +500,19 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
         
         try {
-            // Вариант 1: Прямой запрос (может не работать из-за CORS)
-            // const response = await fetch(googleScriptUrl, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({song: songName})
-            // });
+            // Используем GET с параметрами вместо POST для обхода CORS
+            const response = await fetch(`${googleScriptUrl}?action=addSong&song=${encodeURIComponent(songName)}&t=${Date.now()}`);
             
-            // Вариант 2: Через CORS-прокси (рабочий вариант)
-            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            const response = await fetch(proxyUrl + googleScriptUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({song: songName})
-            });
+            if (!response.ok) {
+                throw new Error('Ошибка сети');
+            }
             
             const data = await response.json();
             
             if (data.status === 'success') {
                 showMessage(`Песня "${songName}" добавлена!`, 'success');
                 songInput.value = '';
-                loadExistingSongs(); // Обновляем список
+                loadExistingSongs();
             } else {
                 throw new Error(data.message || 'Ошибка сервера');
             }
