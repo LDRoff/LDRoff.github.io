@@ -247,44 +247,6 @@
             box-shadow: none;
         }
         
-        .refresh-btn {
-            background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 12px 20px;
-            font-size: clamp(0.9rem, 3vw, 1rem);
-            font-weight: 500;
-            font-family: 'Montserrat', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(129, 199, 132, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 0 auto clamp(20px, 3vw, 25px);
-            width: auto;
-        }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(129, 199, 132, 0.4);
-            background: linear-gradient(135deg, #b2e2b4 0%, #8bd48f 100%);
-        }
-        
-        .refresh-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .refresh-btn:disabled {
-            background: #e0e0e0;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-            color: #9e9e9e;
-        }
-        
         .message {
             text-align: center;
             padding: clamp(15px, 3vw, 20px);
@@ -318,16 +280,22 @@
             border: 1px solid rgba(182, 205, 170, 0.2);
         }
         
+        .songs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(25px, 4vw, 35px);
+        }
+        
         .songs-title {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 15px;
-            margin-bottom: clamp(25px, 4vw, 35px);
             color: #4a7047;
             font-size: clamp(1.4rem, 4vw, 1.7rem);
             font-weight: 500;
             position: relative;
+            margin-bottom: 0;
         }
         
         .songs-title::after {
@@ -338,6 +306,44 @@
             height: 3px;
             background: linear-gradient(to right, #a5d6a7, #5a7d59);
             border-radius: 3px;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(129, 199, 132, 0.3);
+            margin-left: 15px;
+        }
+        
+        .refresh-btn:hover {
+            transform: rotate(30deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(129, 199, 132, 0.4);
+            background: linear-gradient(135deg, #b2e2b4 0%, #8bd48f 100%);
+        }
+        
+        .refresh-btn:active {
+            transform: rotate(30deg) scale(0.95);
+        }
+        
+        .refresh-btn:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: #9e9e9e;
+        }
+        
+        .refresh-btn i {
+            font-size: 1.1rem;
         }
         
         .songs-container {
@@ -498,6 +504,11 @@
             animation: pulse 2s infinite;
         }
         
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 700px) {
             .header {
                 padding: clamp(40px, 10vw, 50px) clamp(15px, 4vw, 20px) clamp(30px, 8vw, 40px);
@@ -544,6 +555,11 @@
             .guest-name {
                 flex-wrap: wrap;
             }
+            
+            .refresh-btn {
+                width: 35px;
+                height: 35px;
+            }
         }
     </style>
 </head>
@@ -582,12 +598,14 @@
             </div>
             
             <div class="songs-list">
-                <h2 class="songs-title">
-                    <i class="fas fa-star"></i> Песни, которые уже выбрали
-                </h2>
-                <button class="refresh-btn" id="refreshBtn">
-                    <i class="fas fa-sync-alt"></i> Обновить список
-                </button>
+                <div class="songs-header">
+                    <h2 class="songs-title">
+                        <i class="fas fa-star"></i> Песни, которые уже выбрали
+                    </h2>
+                    <button class="refresh-btn" id="refreshBtn" title="Обновить список">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
                 <div class="songs-container" id="songsContainer">
                     <div class="song-item">
                         <i class="song-icon fas fa-spinner fa-spin"></i>
@@ -722,14 +740,14 @@
             // Добавляем обработчик для кнопки обновления
             refreshBtn.addEventListener('click', function() {
                 refreshBtn.disabled = true;
-                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обновление...';
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 
                 loadSongs();
                 
                 // Восстанавливаем кнопку через 1 секунду (чтобы избежать слишком частых нажатий)
                 setTimeout(function() {
                     refreshBtn.disabled = false;
-                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Обновить список';
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
                 }, 1000);
             });
             
