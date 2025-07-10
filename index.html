@@ -588,7 +588,745 @@
                         // Проверяем, есть ли данные
                         if (data && data.length > 0) {
                             // Добавляем песни в обратном порядке (новые сверху)
-                            data.forEach(song => {
+                            data.reverse().forEach(song => {
+                                addSongToDOM(song.guestName, song.songName);
+                            });
+                        } else {
+                            // Если нет песен, показываем сообщение
+                            songsContainer.innerHTML = `
+                                <div class="song-item">
+                                    <div class="song-details">
+                                        <div class="song-text">Пока нет предложенных песен. Будьте первым!</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке песен:', error);
+                        songsContainer.innerHTML = `
+                            <div class="song-item">
+                                <div class="song-details">
+                                    <div class="song-text">Не удалось загрузить список песен</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Функция для добавления песни в DOM
+            function addSongToDOM(guestName, songName) {
+                const songItem = document.createElement('div');
+                songItem.className = 'song-item';
+                songItem.innerHTML = `
+                    <i class="song-icon fas fa-music"></i>
+                    <div class="song-details">
+                        <div class="song-text">${songName}</div>
+                        <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
+                    </div>
+                `;
+                songsContainer.appendChild(songItem);
+            }
+            
+            // Обработка отправки формы
+            submitBtn.addEventListener('click', function() {
+                const guestName = guestInput.value.trim();
+                const songName = songInput.value.trim();
+                
+                if (!guestName || !songName) {
+                    showMessage('Пожалуйста, заполните оба поля: ваше имя и название песни', 'error');
+                    return;
+                }
+                
+                // Блокируем кнопку и показываем спиннер
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+                
+                // Отправляем данные в Google Таблицу
+                const formData = new FormData();
+                formData.append('action', 'addSong');
+                formData.append('guestName', guestName);
+                formData.append('songName', songName);
+                
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Добавляем песню в список
+                        addSongToDOM(guestName, songName);
+                        showMessage(`Спасибо, ${guestName}! Песня "${songName}" добавлена в плейлист`, 'success');
+                        
+                        // Очищаем поля ввода
+                        guestInput.value = '';
+                        songInput.value = '';
+                    } else {
+                        showMessage('Произошла ошибка: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке:', error);
+                    showMessage('Произошла ошибка при отправке. Пожалуйста, попробуйте позже', 'error');
+                })
+                .finally(() => {
+                    // Восстанавливаем кнопку
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
+                });
+            });
+            
+            // Обработка нажатия Enter
+            function handleEnter(e) {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            }
+            
+            guestInput.addEventListener('keypress', handleEnter);
+            songInput.addEventListener('keypress', handleEnter);
+            
+            // Функция показа сообщений
+            function showMessage(text, type) {
+                message.innerHTML = text;
+                message.className = 'message ' + type;
+                message.style.display = 'block';
+                
+                // Автоматическое скрытие сообщения через 5 секунд
+                setTimeout(function() {
+                    message.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Добавляем эффект падающих листьев
+            createFallingLeaves();
+            
+            function createFallingLeaves() {
+                const colors = ['#81c784', '#a5d6a7', '#c8e6c9', '#4caf50'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.innerHTML = '<i class="fas fa-leaf"></i>';
+                    leaf.style.position = 'fixed';
+                    leaf.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    leaf.style.opacity = Math.random() * 0.5 + 0.3;
+                    leaf.style.fontSize = Math.random() * 20 + 10 + 'px';
+                    leaf.style.top = '-50px';
+                    leaf.style.left = Math.random() * 100 + 'vw';
+                    leaf.style.zIndex = '0';
+                    leaf.style.pointerEvents = 'none';
+                    leaf.style.animation = `fall ${Math.random() * 10 + 10}s linear infinite`;
+                    leaf.style.animationDelay = Math.random() * 5 + 's';
+                    
+                    document.body.appendChild(leaf);
+                }
+                
+                // Добавляем стили для анимации
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(360deg);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свадебный Плейлист | Эльдар & Евгения</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #e6f4e6 0%, #f5f8e9 100%);
+            color: #3a5338;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="rgba(104, 135, 90, 0.08)" d="M40,40 Q80,10 120,40 T200,40 Q170,80 200,120 T200,200 Q160,170 120,200 T40,200 Q20,160 40,120 T40,40"/></svg>');
+            background-size: 300px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(58, 83, 56, 0.15);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(182, 205, 170, 0.5);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #5a7d59 0%, #3a5338 100%);
+            color: white;
+            text-align: center;
+            padding: 70px 30px 50px;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="rgba(255,255,255,0.1)" d="M20,20 Q40,5 60,20 T100,20 Q85,40 100,60 T100,100 Q60,85 20,100 T0,100 Q5,60 0,20 T20,20"/></svg>');
+            background-size: 200px;
+            opacity: 0.2;
+        }
+        
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, transparent 100%);
+            z-index: 2;
+        }
+        
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 3;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+        
+        .header p {
+            font-size: clamp(1rem, 3.5vw, 1.25rem);
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.7;
+            opacity: 0.92;
+            position: relative;
+            z-index: 3;
+            font-weight: 300;
+            padding: 0 10px;
+        }
+        
+        .decoration {
+            position: absolute;
+            z-index: 1;
+            opacity: 0.1;
+        }
+        
+        .decoration.leaf1 {
+            top: 30px;
+            left: 5%;
+            font-size: clamp(60px, 12vw, 120px);
+            color: #c8e6c9;
+            transform: rotate(30deg);
+        }
+        
+        .decoration.leaf2 {
+            bottom: 20px;
+            right: 10%;
+            font-size: clamp(70px, 14vw, 140px);
+            color: #a5d6a7;
+            transform: rotate(-20deg);
+        }
+        
+        .decoration.leaf3 {
+            top: 60%;
+            left: 15%;
+            font-size: clamp(50px, 10vw, 100px);
+            color: #81c784;
+            transform: rotate(15deg);
+        }
+        
+        .content {
+            padding: clamp(30px, 5vw, 50px) clamp(20px, 4vw, 40px);
+        }
+        
+        .song-form {
+            background: linear-gradient(to bottom, #f1f8e9, #e8f5e9);
+            border-radius: 18px;
+            padding: clamp(25px, 3vw, 35px);
+            box-shadow: 0 12px 35px rgba(90, 116, 86, 0.1);
+            margin-bottom: clamp(30px, 4vw, 45px);
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(182, 205, 170, 0.3);
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: clamp(20px, 3vw, 30px);
+            color: #4a7047;
+            font-size: clamp(1.4rem, 4vw, 1.7rem);
+            font-weight: 500;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .form-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, #81c784, #4caf50);
+            border-radius: 3px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: clamp(15px, 3vw, 25px);
+        }
+        
+        .form-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 15px);
+        }
+        
+        .input-field {
+            padding: clamp(15px, 3vw, 18px) clamp(20px, 4vw, 25px);
+            border: 2px solid #c8e6c9;
+            border-radius: 15px;
+            font-size: clamp(1rem, 3vw, 1.15rem);
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: inset 0 2px 6px rgba(90, 116, 86, 0.08);
+            color: #3a5338;
+            width: 100%;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #81c784;
+            box-shadow: 0 0 0 4px rgba(129, 199, 132, 0.3);
+        }
+        
+        .input-field::placeholder {
+            color: #a5b8a3;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #81c784 0%, #4caf50 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: clamp(15px, 3vw, 18px) 25px;
+            font-size: clamp(1rem, 3vw, 1.15rem);
+            font-weight: 500;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 7px 20px rgba(76, 175, 80, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: clamp(5px, 1vw, 10px);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.45);
+            background: linear-gradient(135deg, #8bd48f 0%, #56b45a 100%);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .submit-btn:disabled {
+            background: #c8e6c9;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message {
+            text-align: center;
+            padding: clamp(15px, 3vw, 20px);
+            border-radius: 12px;
+            margin-top: clamp(15px, 3vw, 20px);
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.5s ease;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            line-height: 1.6;
+        }
+        
+        .success {
+            background: rgba(129, 199, 132, 0.2);
+            color: #2e7d32;
+            border: 2px solid rgba(46, 125, 50, 0.2);
+            display: block;
+        }
+        
+        .error {
+            background: rgba(255, 152, 152, 0.15);
+            color: #c33;
+            border: 2px solid rgba(195, 51, 51, 0.2);
+        }
+        
+        .songs-list {
+            background: white;
+            border-radius: 18px;
+            padding: clamp(25px, 3vw, 35px);
+            box-shadow: 0 12px 35px rgba(90, 116, 86, 0.1);
+            border: 1px solid rgba(182, 205, 170, 0.2);
+        }
+        
+        .songs-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: clamp(25px, 4vw, 35px);
+            color: #4a7047;
+            font-size: clamp(1.4rem, 4vw, 1.7rem);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .songs-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(to right, #a5d6a7, #5a7d59);
+            border-radius: 3px;
+        }
+        
+        .songs-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+        
+        .songs-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .songs-container::-webkit-scrollbar-track {
+            background: #f1f8e9;
+            border-radius: 10px;
+        }
+        
+        .songs-container::-webkit-scrollbar-thumb {
+            background: #a5d6a7;
+            border-radius: 10px;
+        }
+        
+        .songs-container::-webkit-scrollbar-thumb:hover {
+            background: #81c784;
+        }
+        
+        .song-item {
+            display: flex;
+            align-items: flex-start;
+            padding: clamp(12px, 2vw, 18px) clamp(15px, 3vw, 25px);
+            background: #f8fbf3;
+            border-radius: 14px;
+            margin-bottom: clamp(10px, 2vw, 15px);
+            animation: slideIn 0.4s ease;
+            border-left: 5px solid #81c784;
+            box-shadow: 0 4px 12px rgba(90, 116, 86, 0.05);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        
+        .song-item:hover {
+            transform: translateX(5px);
+            background: #edf7e5;
+        }
+        
+        .song-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .song-icon {
+            margin-right: clamp(10px, 2vw, 18px);
+            color: #4caf50;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            min-width: 30px;
+            text-align: center;
+            margin-top: 3px;
+        }
+        
+        .song-details {
+            flex: 1;
+        }
+        
+        .song-text {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: 500;
+            color: #3a5338;
+            margin-bottom: 5px;
+        }
+        
+        .guest-name {
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #7a8d77;
+            font-style: italic;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .guest-name::before {
+            content: "—";
+            margin-right: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: clamp(25px, 3vw, 35px) clamp(20px, 3vw, 30px);
+            color: #7a8d77;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            border-top: 1px solid #e8f5e9;
+            margin-top: 20px;
+            background: #f8fbf3;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        .forest-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .tree {
+            position: absolute;
+            bottom: -20px;
+            right: -50px;
+            width: 150px;
+            height: 200px;
+            background: #5a7d59;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            opacity: 0.1;
+            transform: rotate(10deg);
+        }
+        
+        .bush {
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 120px;
+            height: 80px;
+            background: #4caf50;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+        
+        .leaf {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #81c784;
+            border-radius: 50% 0;
+            opacity: 0.2;
+        }
+        
+        .leaf:nth-child(1) { top: 15%; left: 10%; transform: rotate(45deg); }
+        .leaf:nth-child(2) { top: 25%; right: 15%; transform: rotate(-20deg); }
+        .leaf:nth-child(3) { bottom: 30%; left: 20%; transform: rotate(70deg); }
+        .leaf:nth-child(4) { bottom: 20%; right: 25%; transform: rotate(-50deg); }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @media (max-width: 700px) {
+            .header {
+                padding: clamp(40px, 10vw, 50px) clamp(15px, 4vw, 20px) clamp(30px, 8vw, 40px);
+                clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: clamp(10px, 2vw, 15px);
+            }
+            
+            .tree, .bush {
+                display: none;
+            }
+            
+            .songs-container {
+                max-height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                margin: 20px auto;
+                border-radius: 15px;
+            }
+            
+            .song-form, .songs-list {
+                border-radius: 15px;
+            }
+            
+            .form-title, .songs-title {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .form-title::after, .songs-title::after {
+                width: 80px;
+            }
+            
+            .guest-name {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="forest-elements">
+            <div class="tree"></div>
+            <div class="bush"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+        </div>
+        
+        <div class="header">
+            <i class="decoration leaf1 fas fa-leaf"></i>
+            <i class="decoration leaf2 fas fa-leaf"></i>
+            <i class="decoration leaf3 fas fa-leaf"></i>
+            <h1>Эльдар & Евгения</h1>
+            <p>Дорогие гости! Предложите песни, которые будут звучать на нашей свадьбе во время музыкальных пауз</p>
+        </div>
+        
+        <div class="content">
+            <div class="song-form">
+                <h2 class="form-title"><i class="fas fa-music pulse"></i> Предложите вашу любимую песню</h2>
+                <div class="form-row">
+                    <div class="form-column">
+                        <input type="text" class="input-field" id="guestInput" placeholder="Ваше имя" required>
+                        <input type="text" class="input-field" id="songInput" placeholder="Песня и исполнитель" required>
+                        <button class="submit-btn" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> Отправить
+                        </button>
+                    </div>
+                </div>
+                <div class="message" id="message"></div>
+            </div>
+            
+            <div class="songs-list">
+                <h2 class="songs-title">
+                    <i class="fas fa-star"></i> Песни, которые уже выбрали
+                </h2>
+                <div class="songs-container" id="songsContainer">
+                    <div class="song-item">
+                        <i class="song-icon fas fa-spinner fa-spin"></i>
+                        <div class="song-details">
+                            <div class="song-text">Загружаем список песен...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            С любовью, Эльдар и Евгения • 9 Августа 2025 • Все песни будут звучать на нашей свадьбе!
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const guestInput = document.getElementById('guestInput');
+            const songInput = document.getElementById('songInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const message = document.getElementById('message');
+            const songsContainer = document.getElementById('songsContainer');
+            
+            // URL вашего Google Apps Script
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHsJkdV52tzfyzok9uStnvkGyOLeysWtWxhqp74znZ7IbESxXmf-ipPqplhdQKdveJjg/exec';
+            
+            // Загружаем песни при загрузке страницы
+            loadSongs();
+            
+            // Функция для загрузки песен из таблицы
+            function loadSongs() {
+                fetch(GOOGLE_SCRIPT_URL + '?action=getSongs')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Очищаем контейнер
+                        songsContainer.innerHTML = '';
+                        
+                        // Проверяем, есть ли данные
+                        if (data && data.length > 0) {
+                            // Добавляем песни в обратном порядке (новые сверху)
+                            data.reverse().forEach(song => {
                                 addSongToDOM(song.guestName, song.songName);
                             });
                         } else {
