@@ -429,7 +429,7 @@
         </div>
     </div>
 
-    <script>
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
         const songInput = document.getElementById('songInput');
         const submitBtn = document.getElementById('submitBtn');
@@ -437,15 +437,16 @@
         const songsContainer = document.getElementById('songsContainer');
         
         // Ваш URL Google Apps Script
-        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbzA6t47hdDMrREs9lKsKm-bTMeLBb_UpaKtFUMPixMOZUbDhJU5S6CHm9xa6qO9UfPZ/exec";
+        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbwPQJCrV-tjA4gHeBrzgdIyAh7iucJPJ7bOjZe-77FCAI8i0WODLr7WYEahGxgFKlU/exec";
         
-        // Загрузка песен при открытии страницы
+        // Загрузка существующих песен при загрузке страницы
         loadExistingSongs();
         
-        // Функция загрузки песен из таблицы
+        // Функция для загрузки существующих песен
         async function loadExistingSongs() {
             try {
-                const response = await fetch(googleScriptUrl);
+                // Добавляем параметр для предотвращения кэширования
+                const response = await fetch(`${googleScriptUrl}?t=${Date.now()}`);
                 const data = await response.json();
                 
                 if (data.status === 'success') {
@@ -455,13 +456,13 @@
                     });
                 }
             } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                // Показываем демо-данные если не удалось загрузить
+                console.error('Ошибка загрузки песен:', error);
+                // Показываем демо-данные при ошибке загрузки
                 showDemoSongs();
             }
         }
         
-        // Функция добавления песни в список на странице
+        // Функция для добавления песни в UI
         function addSongToUI(songName) {
             const songItem = document.createElement('div');
             songItem.className = 'song-item';
@@ -472,7 +473,7 @@
             songsContainer.appendChild(songItem);
         }
         
-        // Демо-данные на случай ошибки
+        // Демо-данные при ошибке загрузки
         function showDemoSongs() {
             const demoData = [
                 "Shape of You - Ed Sheeran",
@@ -480,39 +481,55 @@
                 "Uptown Funk - Mark Ronson ft. Bruno Mars"
             ];
             
-            songsContainer.innerHTML = '';
             demoData.forEach(song => {
                 addSongToUI(song);
             });
         }
         
-        // Функция отправки новой песни
-        async function submitSong() {
+        // Обработка отправки формы
+        submitBtn.addEventListener('click', async function() {
             const songName = songInput.value.trim();
             
             if (!songName) {
-                showMessage('Пожалуйста, введите название песни', 'error');
+                showMessage('Пожалуйста, введите название песни и исполнителя', 'error');
+                songInput.focus();
                 return;
             }
             
+            // Отключаем кнопку на время отправки
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
             
             try {
+                // Отправляем данные в Google Таблицы
                 const response = await fetch(googleScriptUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({song: songName})
+                    body: JSON.stringify({song: songName}),
+                    redirect: 'follow' // Важно для Google Apps Script
                 });
+                
+                // Проверяем ответ
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
                 
                 const data = await response.json();
                 
                 if (data.status === 'success') {
-                    showMessage(`Спасибо! Песня "${songName}" добавлена!`, 'success');
+                    // Добавляем песню в список
+                    addSongToUI(songName);
+                    
+                    // Показываем сообщение об успехе
+                    showMessage(`Спасибо! Песня "${songName}" обязательно заиграет на танцевальной паузе!`, 'success');
+                    
+                    // Очищаем поле ввода
                     songInput.value = '';
-                    loadExistingSongs(); // Обновляем список
+                    
+                    // Обновляем список песен
+                    loadExistingSongs();
                 } else {
                     throw new Error(data.message || 'Ошибка сервера');
                 }
@@ -520,25 +537,27 @@
                 console.error('Ошибка:', error);
                 showMessage('Не удалось добавить песню: ' + error.message, 'error');
             } finally {
+                // Восстанавливаем кнопку
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
             }
-        }
-        
-        // Обработчики событий
-        submitBtn.addEventListener('click', submitSong);
-        
-        songInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') submitSong();
         });
         
-        // Показать сообщение
+        // Обработка нажатия Enter
+        songInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
+        
+        // Функция показа сообщений
         function showMessage(text, type) {
             message.innerHTML = text;
             message.className = 'message ' + type;
             message.style.display = 'block';
             
-            setTimeout(() => {
+            // Автоматическое скрытие сообщения через 5 секунд
+            setTimeout(function() {
                 message.style.display = 'none';
             }, 5000);
         }
