@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        /* Ваши стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -572,48 +571,47 @@
             const message = document.getElementById('message');
             const songsContainer = document.getElementById('songsContainer');
             
-            // Замените на ваш Google Apps Script URL
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
+            // URL вашего Google Apps Script
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHsJkdV52tzfyzok9uStnvkGyOLeysWtWxhqp74znZ7IbESxXmf-ipPqplhdQKdveJjg/exec';
             
             // Загружаем песни при загрузке страницы
             loadSongs();
             
-            // Функция для загрузки песен
+            // Функция для загрузки песен из таблицы
             function loadSongs() {
-                // Создаем уникальное имя функции обратного вызова
-                const callbackName = 'jsonp_callback_' + Date.now();
-                const script = document.createElement('script');
-                
-                // Создаем глобальную функцию для обработки ответа
-                window[callbackName] = function(data) {
-                    // Удаляем временные элементы
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    
-                    // Очищаем контейнер
-                    songsContainer.innerHTML = '';
-                    
-                    // Проверяем, есть ли данные
-                    if (data && data.length > 0) {
-                        // Добавляем песни в обратном порядке (новые сверху)
-                        data.reverse().forEach(song => {
-                            addSongToDOM(song.guestName, song.songName);
-                        });
-                    } else {
-                        // Если нет песен, показываем сообщение
+                fetch(GOOGLE_SCRIPT_URL + '?action=getSongs')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Очищаем контейнер
+                        songsContainer.innerHTML = '';
+                        
+                        // Проверяем, есть ли данные
+                        if (data && data.length > 0) {
+                            // Добавляем песни в обратном порядке (новые сверху)
+                            data.reverse().forEach(song => {
+                                addSongToDOM(song.guestName, song.songName);
+                            });
+                        } else {
+                            // Если нет песен, показываем сообщение
+                            songsContainer.innerHTML = `
+                                <div class="song-item">
+                                    <div class="song-details">
+                                        <div class="song-text">Пока нет предложенных песен. Будьте первым!</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке песен:', error);
                         songsContainer.innerHTML = `
                             <div class="song-item">
                                 <div class="song-details">
-                                    <div class="song-text">Пока нет предложенных песен. Будьте первым!</div>
+                                    <div class="song-text">Не удалось загрузить список песен</div>
                                 </div>
                             </div>
                         `;
-                    }
-                };
-                
-                // Создаем URL с callback
-                script.src = `${GOOGLE_SCRIPT_URL}?callback=${callbackName}`;
-                document.body.appendChild(script);
+                    });
             }
             
             // Функция для добавления песни в DOM
@@ -640,58 +638,44 @@
                     return;
                 }
                 
-                // Оптимистично добавляем песню в список
-                addSongToDOM(guestName, songName);
-                showMessage(`Спасибо, ${guestName}! Песня "${songName}" отправлена`, 'success');
+                // Блокируем кнопку и показываем спиннер
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
                 
-                // Отправляем данные через iframe метод
-                sendToGoogleSheets(guestName, songName);
+                // Отправляем данные в Google Таблицу
+                const formData = new FormData();
+                formData.append('action', 'addSong');
+                formData.append('guestName', guestName);
+                formData.append('songName', songName);
                 
-                // Очищаем поля
-                guestInput.value = '';
-                songInput.value = '';
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Добавляем песню в список
+                        addSongToDOM(guestName, songName);
+                        showMessage(`Спасибо, ${guestName}! Песня "${songName}" добавлена в плейлист`, 'success');
+                        
+                        // Очищаем поля ввода
+                        guestInput.value = '';
+                        songInput.value = '';
+                    } else {
+                        showMessage('Произошла ошибка: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке:', error);
+                    showMessage('Произошла ошибка при отправке. Пожалуйста, попробуйте позже', 'error');
+                })
+                .finally(() => {
+                    // Восстанавливаем кнопку
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
+                });
             });
-            
-            // Функция для отправки данных в Google Таблицы через iframe
-            function sendToGoogleSheets(guestName, songName) {
-                // Создаем скрытый iframe
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.name = 'hidden-iframe-' + Date.now();
-                
-                // Создаем форму
-                const form = document.createElement('form');
-                form.action = GOOGLE_SCRIPT_URL;
-                form.method = 'POST';
-                form.target = iframe.name;
-                form.style.display = 'none';
-                
-                // Создаем скрытые поля для данных
-                const guestInput = document.createElement('input');
-                guestInput.type = 'hidden';
-                guestInput.name = 'guestName';
-                guestInput.value = guestName;
-                form.appendChild(guestInput);
-                
-                const songInput = document.createElement('input');
-                songInput.type = 'hidden';
-                songInput.name = 'songName';
-                songInput.value = songName;
-                form.appendChild(songInput);
-                
-                // Добавляем элементы в DOM
-                document.body.appendChild(iframe);
-                document.body.appendChild(form);
-                
-                // Отправляем форму
-                form.submit();
-                
-                // Удаляем элементы через некоторое время
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    document.body.removeChild(form);
-                }, 5000);
-            }
             
             // Обработка нажатия Enter
             function handleEnter(e) {
