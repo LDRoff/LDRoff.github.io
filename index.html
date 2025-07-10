@@ -381,6 +381,7 @@
             border-left: 5px solid #81c784;
             box-shadow: 0 4px 12px rgba(90, 116, 86, 0.05);
             transition: transform 0.3s ease, background 0.3s ease;
+            cursor: pointer;
         }
         
         .song-item:hover {
@@ -484,6 +485,88 @@
         .leaf:nth-child(3) { bottom: 30%; left: 20%; transform: rotate(70deg); }
         .leaf:nth-child(4) { bottom: 20%; right: 25%; transform: rotate(-50deg); }
         
+        /* Стили для модального окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #3a5338;
+            text-align: center;
+        }
+        
+        .modal-song-name {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: #4a7047;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #81c784 0%, #4caf50 100%);
+            color: white;
+        }
+        
+        .modal-btn-cancel {
+            background: #f5f5f5;
+            color: #555;
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
@@ -500,13 +583,13 @@
             100% { transform: scale(1); }
         }
         
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
         }
         
         @media (max-width: 700px) {
@@ -622,6 +705,18 @@
         </div>
     </div>
 
+    <!-- Модальное окно для подтверждения открытия в Яндекс.Музыке -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 class="modal-title">Открыть эту песню в Яндекс.Музыке?</h3>
+            <p class="modal-song-name" id="modalSongName"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-confirm" id="modalConfirm">Да</button>
+                <button class="modal-btn modal-btn-cancel" id="modalCancel">Нет</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const guestInput = document.getElementById('guestInput');
@@ -630,9 +725,15 @@
             const refreshBtn = document.getElementById('refreshBtn');
             const message = document.getElementById('message');
             const songsContainer = document.getElementById('songsContainer');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalConfirm = document.getElementById('modalConfirm');
+            const modalCancel = document.getElementById('modalCancel');
+            const modalSongName = document.getElementById('modalSongName');
             
             // URL вашего Google Apps Script
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHsJkdV52tzfyzok9uStnvkGyOLeysWtWxhqp74znZ7IbESxXmf-ipPqplhdQKdveJjg/exec';
+            
+            let currentSong = '';
             
             // Загружаем песни при загрузке страницы
             loadSongs();
@@ -685,6 +786,14 @@
                         <div class="guest-name"><i class="fas fa-user"></i> ${guestName}</div>
                     </div>
                 `;
+                
+                // Добавляем обработчик клика на песню
+                songItem.addEventListener('click', function() {
+                    currentSong = songName;
+                    modalSongName.textContent = songName;
+                    modalOverlay.classList.add('active');
+                });
+                
                 songsContainer.appendChild(songItem);
             }
             
@@ -749,6 +858,26 @@
                     refreshBtn.disabled = false;
                     refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
                 }, 1000);
+            });
+            
+            // Обработчики для модального окна
+            modalConfirm.addEventListener('click', function() {
+                // Кодируем название песни для URL
+                const encodedSong = encodeURIComponent(currentSong);
+                // Открываем Яндекс.Музыку с поиском
+                window.open(`https://music.yandex.ru/search?text=${encodedSong}`, '_blank');
+                modalOverlay.classList.remove('active');
+            });
+            
+            modalCancel.addEventListener('click', function() {
+                modalOverlay.classList.remove('active');
+            });
+            
+            // Закрытие модального окна при клике на оверлей
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    modalOverlay.classList.remove('active');
+                }
             });
             
             // Обработка нажатия Enter
