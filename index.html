@@ -588,7 +588,7 @@
                         // Проверяем, есть ли данные
                         if (data && data.length > 0) {
                             // Добавляем песни в обратном порядке (новые сверху)
-                            data.reverse().forEach(song => {
+                            data.forEach(song => {
                                 addSongToDOM(song.guestName, song.songName);
                             });
                         } else {
