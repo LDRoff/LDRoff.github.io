@@ -593,10 +593,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const message = document.getElementById('message');
     const songsContainer = document.getElementById('songsContainer');
     
-    // ВАЖНО: Вставьте сюда ваш URL веб-приложения!
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvItTBohl4vDLZQbbCkEFqKIfl03rCFtFO8XJS3PlXuZQJ-YDOl63iY2J4tkZT7h00zw/exec';
-
-    function addNewSong(guestName, songName) {
+    // Вставьте сюда URL вашего веб-приложения
+    const SCRIPT_URL = 'ВАШ_GOOGLE_SCRIPT_URL';
+    
+    // Загружаем существующие песни при загрузке страницы
+    loadSongs();
+    
+    // Функция для загрузки песен из таблицы
+    function loadSongs() {
+        fetch(SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                songsContainer.innerHTML = '';
+                data.reverse().forEach(song => {
+                    addSongToDOM(song.guestName, song.songName);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading songs:', error);
+                // Показываем примеры песен, если не удалось загрузить
+                songsContainer.innerHTML = `
+                    <div class="song-item">
+                        <i class="song-icon fas fa-music"></i>
+                        <div class="song-details">
+                            <div class="song-text">A Thousand Years - Christina Perri</div>
+                            <div class="guest-name"><i class="fas fa-user"></i> Анна Иванова</div>
+                        </div>
+                    </div>
+                    <div class="song-item">
+                        <i class="song-icon fas fa-music"></i>
+                        <div class="song-details">
+                            <div class="song-text">Perfect - Ed Sheeran</div>
+                            <div class="guest-name"><i class="fas fa-user"></i> Сергей Петров</div>
+                        </div>
+                    </div>
+                `;
+            });
+    }
+    
+    // Функция для добавления песни в DOM
+    function addSongToDOM(guestName, songName) {
         const songItem = document.createElement('div');
         songItem.className = 'song-item';
         songItem.innerHTML = `
@@ -608,8 +644,9 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         songsContainer.insertBefore(songItem, songsContainer.firstChild);
     }
-
-    submitBtn.addEventListener('click', async function() {
+    
+    // Обработка отправки формы
+    submitBtn.addEventListener('click', function() {
         const guestName = guestInput.value.trim();
         const songName = songInput.value.trim();
         
@@ -621,52 +658,61 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
         
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ guest: guestName, song: songName })
-            });
-            
-            const result = await response.json();
-            
-            if (result.status === "success") {
-                addNewSong(guestName, songName);
+        // Отправляем данные в Google Таблицу
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                guestName: guestName,
+                songName: songName
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                addSongToDOM(guestName, songName);
                 showMessage(`Спасибо, ${guestName}! Песня "<strong>${songName}</strong>" добавлена в наш плейлист!`, 'success');
                 guestInput.value = '';
                 songInput.value = '';
             } else {
-                throw new Error('Ошибка сервера');
+                showMessage('Произошла ошибка при добавлении песни. Пожалуйста, попробуйте позже.', 'error');
             }
-        } catch (error) {
+        })
+        .catch(error => {
             console.error('Error:', error);
-            showMessage('Произошла ошибка при отправке. Пожалуйста, попробуйте снова.', 'error');
-        } finally {
+            showMessage('Произошла ошибка при добавлении песни. Пожалуйста, попробуйте позже.', 'error');
+        })
+        .finally(() => {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
-        }
+            guestInput.focus();
+        });
     });
-
+    
+    // Обработка нажатия Enter
+    function handleEnter(e) {
+        if (e.key === 'Enter') {
+            submitBtn.click();
+        }
+    }
+    
+    guestInput.addEventListener('keypress', handleEnter);
+    songInput.addEventListener('keypress', handleEnter);
+    
+    // Функция показа сообщений
     function showMessage(text, type) {
         message.innerHTML = text;
         message.className = 'message ' + type;
         message.style.display = 'block';
         
-        setTimeout(() => {
+        setTimeout(function() {
             message.style.display = 'none';
         }, 5000);
     }
-
-    // Обработчики Enter
-    [guestInput, songInput].forEach(input => {
-        input.addEventListener('keypress', e => {
-            if (e.key === 'Enter') submitBtn.click();
-        });
-    });
-
+    
+    // Добавляем эффект падающих листьев
     createFallingLeaves();
     
     function createFallingLeaves() {
@@ -689,7 +735,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(leaf);
         }
         
-        // Добавляем стили для анимации
         const style = document.createElement('style');
         style.innerHTML = `
             @keyframes fall {
